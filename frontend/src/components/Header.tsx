@@ -23,6 +23,12 @@ const Header = () => {
               课程列表
             </Link>
             
+            {isAuthenticated && (
+              <Link to="/favorites" className="nav-link">
+                我的收藏
+              </Link>
+            )}
+            
             {isAuthenticated ? (
               <>
                 <div className="user-info">

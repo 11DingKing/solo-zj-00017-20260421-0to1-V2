@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import StarRating from "@/components/StarRating";
 import RatingDistributionChart from "@/components/RatingDistributionChart";
-import { coursesApi, reviewsApi } from "@/services/api";
+import { coursesApi, reviewsApi, favoritesApi } from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
 import type { CourseDetail, Review, CreateReviewRequest } from "@/types";
 import "./CourseDetail.css";
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
 
   const [courseDetail, setCourseDetail] = useState<CourseDetail | null>(null);
@@ -18,6 +19,11 @@ const CourseDetail = () => {
   const [newContent, setNewContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [favoriting, setFavoriting] = useState(false);
+  const [reviewSortBy, setReviewSortBy] = useState<string>("createdAt");
+  const [reviewSortDescending, setReviewSortDescending] = useState(true);
+  const [sortedReviews, setSortedReviews] = useState<Review[]>([]);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadCourseDetail = async () => {
     if (!id) return;
@@ -26,6 +32,7 @@ const CourseDetail = () => {
       setLoading(true);
       const response = await coursesApi.getById(id);
       setCourseDetail(response.data);
+      setSortedReviews(response.data.reviews);
       setError("");
 
       if (response.data.userReview) {
@@ -40,9 +47,65 @@ const CourseDetail = () => {
     }
   };
 
+  const loadReviews = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      const response = await reviewsApi.getByCourse(id, {
+        sortBy: reviewSortBy,
+        sortDescending: reviewSortDescending,
+      });
+      setSortedReviews(response.data);
+    } catch (err) {
+      console.error("加载评价失败", err);
+    }
+  }, [id, reviewSortBy, reviewSortDescending]);
+
   useEffect(() => {
     loadCourseDetail();
   }, [id]);
+
+  useEffect(() => {
+    if (courseDetail) {
+      loadReviews();
+    }
+  }, [courseDetail, loadReviews]);
+
+  const handleToggleFavorite = useCallback(async () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    if (!id || favoriting) return;
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(async () => {
+      setFavoriting(true);
+
+      try {
+        const response = await favoritesApi.toggle(id);
+        const newIsFavorited = response.data.isFavorited;
+
+        setCourseDetail((prev) =>
+          prev
+            ? {
+                ...prev,
+                isFavorited: newIsFavorited,
+                course: { ...prev.course, isFavorited: newIsFavorited },
+              }
+            : null
+        );
+      } catch (err) {
+        console.error("收藏失败", err);
+      } finally {
+        setFavoriting(false);
+      }
+    }, 300);
+  }, [id, isAuthenticated, navigate, favoriting]);
 
   const handleSubmitReview = async () => {
     if (!isAuthenticated) {
@@ -123,7 +186,7 @@ const CourseDetail = () => {
     );
   }
 
-  const { course, reviews, ratingDistribution, hasUserReviewed } = courseDetail;
+  const { course, ratingDistribution, hasUserReviewed } = courseDetail;
 
   return (
     <div className="course-detail-page">
@@ -134,7 +197,17 @@ const CourseDetail = () => {
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="course-header card">
-        <h1 className="page-title">{course.name}</h1>
+        <div className="course-header-top">
+          <h1 className="page-title">{course.name}</h1>
+          <button
+            className={`favorite-btn ${courseDetail.isFavorited ? "favorited" : ""}`}
+            onClick={handleToggleFavorite}
+            disabled={favoriting}
+            title={courseDetail.isFavorited ? "取消收藏" : "收藏课程"}
+          >
+            {courseDetail.isFavorited ? "❤️" : "🤍"}
+          </button>
+        </div>
         <div className="course-meta">
           <span>👨‍🏫 {course.teacherName}</span>
           <span>📅 {course.semester}</span>
@@ -219,16 +292,34 @@ const CourseDetail = () => {
       )}
 
       <div className="reviews-section">
-        <h2 className="section-title">全部评价 ({reviews.length})</h2>
+        <div className="reviews-header">
+          <h2 className="section-title">全部评价 ({sortedReviews.length})</h2>
+          <div className="review-sort-controls">
+            <select
+              className="form-select sort-select"
+              value={reviewSortBy}
+              onChange={(e) => setReviewSortBy(e.target.value)}
+            >
+              <option value="createdAt">按时间排序</option>
+              <option value="rating">按评分排序</option>
+            </select>
+            <button
+              className="btn btn-secondary sort-order-btn"
+              onClick={() => setReviewSortDescending(!reviewSortDescending)}
+            >
+              {reviewSortDescending ? "↓ 降序" : "↑ 升序"}
+            </button>
+          </div>
+        </div>
 
-        {reviews.length === 0 ? (
+        {sortedReviews.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">💬</div>
             <div className="empty-text">暂无评价，快来发表第一条评价吧！</div>
           </div>
         ) : (
           <div className="reviews-list">
-            {reviews.map((review) => (
+            {sortedReviews.map((review) => (
               <div key={review.id} className="review-card card">
                 <div className="review-header">
                   <div className="review-user">

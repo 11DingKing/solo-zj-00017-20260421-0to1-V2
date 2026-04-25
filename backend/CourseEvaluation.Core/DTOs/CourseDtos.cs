@@ -8,7 +8,8 @@ public record CourseDto(
     int Credits,
     double? AverageRating,
     int ReviewCount,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool? IsFavorited = null);
 
 public record CreateCourseRequest(
     string Name,

@@ -18,6 +18,51 @@
   box-shadow: var(--shadow);
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
+  position: relative;
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+  z-index: 1;
+}
+
+.favorite-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.favorite-btn:active {
+  transform: scale(0.95);
+}
+
+.favorite-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.favorite-btn.favorited {
+  animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .course-card:hover {

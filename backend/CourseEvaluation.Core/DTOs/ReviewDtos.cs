@@ -31,4 +31,5 @@ public record CourseDetailDto(
     List<ReviewDto> Reviews,
     RatingDistribution RatingDistribution,
     bool HasUserReviewed,
-    ReviewDto? UserReview);
+    ReviewDto? UserReview,
+    bool? IsFavorited = null);

@@ -67,9 +67,18 @@ public class ReviewsController : ControllerBase
     [HttpGet("course/{courseId}")]
     public async Task<ActionResult<List<ReviewDto>>> GetReviewsForCourse(
         Guid courseId,
-        CancellationToken cancellationToken)
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDescending = true,
+        CancellationToken cancellationToken = default)
     {
-        var reviews = await _reviewService.GetReviewsForCourseAsync(courseId, cancellationToken);
+        var sortEnum = sortBy?.ToLower() switch
+        {
+            "rating" => Core.Interfaces.ReviewSortBy.Rating,
+            _ => Core.Interfaces.ReviewSortBy.CreatedAt
+        };
+
+        var reviews = await _reviewService.GetReviewsForCourseAsync(
+            courseId, sortEnum, sortDescending, cancellationToken);
         return Ok(reviews);
     }
 

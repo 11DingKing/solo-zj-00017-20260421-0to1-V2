@@ -8,14 +8,14 @@ interface RatingDistributionChartProps {
 
 const RatingDistributionChart = ({ distribution }: RatingDistributionChartProps) => {
   const data = [
-    { name: '1星', value: distribution.star1 },
-    { name: '2星', value: distribution.star2 },
-    { name: '3星', value: distribution.star3 },
-    { name: '4星', value: distribution.star4 },
     { name: '5星', value: distribution.star5 },
+    { name: '4星', value: distribution.star4 },
+    { name: '3星', value: distribution.star3 },
+    { name: '2星', value: distribution.star2 },
+    { name: '1星', value: distribution.star1 },
   ];
 
-  const colors = ['#ff4d4f', '#faad14', '#faad14', '#52c41a', '#52c41a'];
+  const colors = ['#52c41a', '#52c41a', '#faad14', '#faad14', '#ff4d4f'];
   const total = distribution.star1 + distribution.star2 + distribution.star3 + distribution.star4 + distribution.star5;
 
   if (total === 0) {

@@ -7,6 +7,7 @@ public interface ICourseService
 {
     Task<PagedResult<CourseDto>> GetCoursesAsync(
         CourseListRequest request,
+        Guid? userId = null,
         CancellationToken cancellationToken = default);
 
     Task<CourseDto?> GetCourseByIdAsync(Guid id, CancellationToken cancellationToken = default);

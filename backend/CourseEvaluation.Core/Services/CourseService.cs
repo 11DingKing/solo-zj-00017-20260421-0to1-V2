@@ -9,24 +9,37 @@ public class CourseService : ICourseService
     private readonly ICourseRepository _courseRepository;
     private readonly IReviewRepository _reviewRepository;
     private readonly IReviewService _reviewService;
+    private readonly IFavoriteRepository _favoriteRepository;
 
     public CourseService(
         ICourseRepository courseRepository,
         IReviewRepository reviewRepository,
-        IReviewService reviewService)
+        IReviewService reviewService,
+        IFavoriteRepository favoriteRepository)
     {
         _courseRepository = courseRepository;
         _reviewRepository = reviewRepository;
         _reviewService = reviewService;
+        _favoriteRepository = favoriteRepository;
     }
 
     public async Task<PagedResult<CourseDto>> GetCoursesAsync(
         CourseListRequest request,
+        Guid? userId = null,
         CancellationToken cancellationToken = default)
     {
         var pagedResult = await _courseRepository.SearchAndSortAsync(request, cancellationToken);
 
-        var courseDtos = pagedResult.Items.Select(MapToCourseDto).ToList();
+        List<Guid>? favoriteCourseIds = null;
+        if (userId.HasValue)
+        {
+            favoriteCourseIds = await _favoriteRepository.GetFavoriteCourseIdsAsync(
+                userId.Value, cancellationToken);
+        }
+
+        var courseDtos = pagedResult.Items
+            .Select(course => MapToCourseDto(course, favoriteCourseIds))
+            .ToList();
 
         return new PagedResult<CourseDto>(
             courseDtos,
@@ -60,6 +73,7 @@ public class CourseService : ICourseService
 
         ReviewDto? userReview = null;
         var hasUserReviewed = false;
+        bool? isFavorited = null;
 
         if (userId.HasValue)
         {
@@ -70,14 +84,18 @@ public class CourseService : ICourseService
                 hasUserReviewed = true;
                 userReview = MapToReviewDto(userReviewEntity);
             }
+
+            isFavorited = await _favoriteRepository.GetByUserAndCourseAsync(
+                userId.Value, courseId, cancellationToken) != null;
         }
 
         return new CourseDetailDto(
-            Course: MapToCourseDto(course),
+            Course: MapToCourseDto(course, userId.HasValue ? new List<Guid> { courseId } : null, isFavorited),
             Reviews: reviewDtos,
             RatingDistribution: ratingDistribution,
             HasUserReviewed: hasUserReviewed,
-            UserReview: userReview);
+            UserReview: userReview,
+            IsFavorited: isFavorited);
     }
 
     public async Task<CourseDto> CreateCourseAsync(
@@ -118,8 +136,17 @@ public class CourseService : ICourseService
         await _courseRepository.SaveChangesAsync(cancellationToken);
     }
 
-    private static CourseDto MapToCourseDto(Course course)
+    private static CourseDto MapToCourseDto(
+        Course course,
+        List<Guid>? favoriteCourseIds = null,
+        bool? isFavorited = null)
     {
+        bool? finalIsFavorited = isFavorited;
+        if (finalIsFavorited == null && favoriteCourseIds != null)
+        {
+            finalIsFavorited = favoriteCourseIds.Contains(course.Id);
+        }
+
         return new CourseDto(
             Id: course.Id,
             Name: course.Name,
@@ -128,7 +155,8 @@ public class CourseService : ICourseService
             Credits: course.Credits,
             AverageRating: course.AverageRating,
             ReviewCount: course.ReviewCount,
-            CreatedAt: course.CreatedAt);
+            CreatedAt: course.CreatedAt,
+            IsFavorited: finalIsFavorited);
     }
 
     private static ReviewDto MapToReviewDto(Review review)

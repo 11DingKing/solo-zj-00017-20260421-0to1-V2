@@ -16,6 +16,7 @@ export interface Course {
   averageRating: number | null;
   reviewCount: number;
   createdAt: string;
+  isFavorited?: boolean | null;
 }
 
 export interface Review {
@@ -43,6 +44,7 @@ export interface CourseDetail {
   ratingDistribution: RatingDistribution;
   hasUserReviewed: boolean;
   userReview: Review | null;
+  isFavorited?: boolean | null;
 }
 
 export interface PagedResult<T> {

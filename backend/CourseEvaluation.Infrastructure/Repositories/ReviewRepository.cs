@@ -31,13 +31,25 @@ public class ReviewRepository : Repository<Review>, IReviewRepository
 
     public async Task<List<Review>> GetByCourseIdAsync(
         Guid courseId,
+        ReviewSortBy? sortBy = null,
+        bool sortDescending = true,
         CancellationToken cancellationToken = default)
     {
-        return await DbSet
+        var query = DbSet
             .Include(r => r.User)
-            .Where(r => r.CourseId == courseId)
-            .OrderByDescending(r => r.CreatedAt)
-            .ToListAsync(cancellationToken);
+            .Where(r => r.CourseId == courseId);
+
+        query = (sortBy ?? ReviewSortBy.CreatedAt) switch
+        {
+            ReviewSortBy.Rating => sortDescending
+                ? query.OrderByDescending(r => r.Rating)
+                : query.OrderBy(r => r.Rating),
+            _ => sortDescending
+                ? query.OrderByDescending(r => r.CreatedAt)
+                : query.OrderBy(r => r.CreatedAt)
+        };
+
+        return await query.ToListAsync(cancellationToken);
     }
 
     public async Task<Dictionary<int, int>> GetRatingDistributionAsync(

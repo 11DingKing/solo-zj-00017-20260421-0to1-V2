@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StarRating from '@/components/StarRating';
-import { coursesApi } from '@/services/api';
+import { coursesApi, favoritesApi } from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import type { Course, CreateCourseRequest } from '@/types';
 import './CourseList.css';
 
 const CourseList = () => {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +24,8 @@ const CourseList = () => {
     credits: 3,
   });
   const [addingCourse, setAddingCourse] = useState(false);
+  const [favoritingCourseIds, setFavoritingCourseIds] = useState<Set<string>>(new Set());
+  const debounceTimerRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   const loadCourses = async () => {
     try {
@@ -54,6 +56,51 @@ const CourseList = () => {
   const handleCourseClick = (courseId: string) => {
     navigate(`/courses/${courseId}`);
   };
+
+  const handleToggleFavorite = useCallback(async (courseId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (favoritingCourseIds.has(courseId)) {
+      return;
+    }
+
+    const existingTimer = debounceTimerRef.current.get(courseId);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+
+    const timer = setTimeout(async () => {
+      setFavoritingCourseIds((prev) => new Set(prev).add(courseId));
+
+      try {
+        const response = await favoritesApi.toggle(courseId);
+        const newIsFavorited = response.data.isFavorited;
+
+        setCourses((prevCourses) =>
+          prevCourses.map((course) =>
+            course.id === courseId
+              ? { ...course, isFavorited: newIsFavorited }
+              : course
+          )
+        );
+      } catch (err) {
+        console.error('收藏失败', err);
+      } finally {
+        setFavoritingCourseIds((prev) => {
+          const next = new Set(prev);
+          next.delete(courseId);
+          return next;
+        });
+      }
+    }, 300);
+
+    debounceTimerRef.current.set(courseId, timer);
+  }, [isAuthenticated, navigate, favoritingCourseIds]);
 
   const handleAddCourse = async () => {
     if (!newCourse.name || !newCourse.teacherName || !newCourse.semester) {
@@ -142,6 +189,15 @@ const CourseList = () => {
               className="course-card"
               onClick={() => handleCourseClick(course.id)}
             >
+              <button
+                className={`favorite-btn ${course.isFavorited ? 'favorited' : ''}`}
+                onClick={(e) => handleToggleFavorite(course.id, e)}
+                disabled={favoritingCourseIds.has(course.id)}
+                title={course.isFavorited ? '取消收藏' : '收藏课程'}
+              >
+                {course.isFavorited ? '❤️' : '🤍'}
+              </button>
+              
               <div className="course-info">
                 <h3 className="course-name">{course.name}</h3>
                 <div className="course-meta">

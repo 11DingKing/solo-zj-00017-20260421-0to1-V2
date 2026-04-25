@@ -2,6 +2,12 @@ using CourseEvaluation.Core.Entities;
 
 namespace CourseEvaluation.Core.Interfaces;
 
+public enum ReviewSortBy
+{
+    CreatedAt,
+    Rating
+}
+
 public interface IReviewRepository : IRepository<Review>
 {
     Task<Review?> GetByUserAndCourseAsync(
@@ -16,6 +22,8 @@ public interface IReviewRepository : IRepository<Review>
 
     Task<List<Review>> GetByCourseIdAsync(
         Guid courseId,
+        ReviewSortBy? sortBy = null,
+        bool sortDescending = true,
         CancellationToken cancellationToken = default);
 
     Task<Dictionary<int, int>> GetRatingDistributionAsync(

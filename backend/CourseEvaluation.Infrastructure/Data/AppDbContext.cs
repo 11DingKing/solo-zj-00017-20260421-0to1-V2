@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Course> Courses { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<Favorite> Favorites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -58,6 +59,24 @@ public class AppDbContext : DbContext
             entity.HasIndex(r => new { r.UserId, r.CourseId }).IsUnique();
 
             entity.HasCheckConstraint("CK_Review_Rating", "\"Rating\" >= 1 AND \"Rating\" <= 5");
+        });
+
+        modelBuilder.Entity<Favorite>(entity =>
+        {
+            entity.HasKey(f => f.Id);
+            entity.Property(f => f.CreatedAt).IsRequired();
+
+            entity.HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(f => f.Course)
+                .WithMany()
+                .HasForeignKey(f => f.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(f => new { f.UserId, f.CourseId }).IsUnique();
         });
     }
 }

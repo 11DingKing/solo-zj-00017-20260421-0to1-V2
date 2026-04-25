@@ -74,9 +74,12 @@ public class ReviewService : IReviewService
 
     public async Task<List<ReviewDto>> GetReviewsForCourseAsync(
         Guid courseId,
+        ReviewSortBy? sortBy = null,
+        bool sortDescending = true,
         CancellationToken cancellationToken = default)
     {
-        var reviews = await _reviewRepository.GetByCourseIdAsync(courseId, cancellationToken);
+        var reviews = await _reviewRepository.GetByCourseIdAsync(
+            courseId, sortBy, sortDescending, cancellationToken);
         return reviews.Select(MapToReviewDto).ToList();
     }
 

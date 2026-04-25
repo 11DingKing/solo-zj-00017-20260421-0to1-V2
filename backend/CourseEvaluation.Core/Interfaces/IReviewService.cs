@@ -17,6 +17,8 @@ public interface IReviewService
 
     Task<List<ReviewDto>> GetReviewsForCourseAsync(
         Guid courseId,
+        ReviewSortBy? sortBy = null,
+        bool sortDescending = true,
         CancellationToken cancellationToken = default);
 
     Task DeleteReviewAsync(Guid reviewId, CancellationToken cancellationToken = default);

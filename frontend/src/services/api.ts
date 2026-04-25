@@ -77,11 +77,22 @@ export const reviewsApi = {
   delete: (id: string) =>
     api.delete(`/reviews/${id}`),
   
-  getByCourse: (courseId: string) =>
-    api.get<Review[]>(`/reviews/course/${courseId}`),
+  getByCourse: (courseId: string, params?: { sortBy?: string; sortDescending?: boolean }) =>
+    api.get<Review[]>(`/reviews/course/${courseId}`, { params }),
   
   getMyReview: (courseId: string) =>
     api.get<Review>(`/reviews/my/${courseId}`),
+};
+
+export const favoritesApi = {
+  toggle: (courseId: string) =>
+    api.post<{ isFavorited: boolean }>(`/favorites/toggle/${courseId}`),
+  
+  check: (courseId: string) =>
+    api.get<{ isFavorited: boolean }>(`/favorites/check/${courseId}`),
+  
+  getList: (params?: { page?: number; pageSize?: number }) =>
+    api.get<PagedResult<Course>>('/favorites', { params }),
 };
 
 export default api;

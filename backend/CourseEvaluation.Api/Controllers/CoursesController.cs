@@ -26,8 +26,18 @@ public class CoursesController : ControllerBase
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
+        Guid? userId = null;
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null)
+            {
+                userId = Guid.Parse(userIdClaim);
+            }
+        }
+
         var request = new CourseListRequest(searchTerm, sortBy, sortDescending, page, pageSize);
-        var result = await _courseService.GetCoursesAsync(request, cancellationToken);
+        var result = await _courseService.GetCoursesAsync(request, userId, cancellationToken);
         return Ok(result);
     }
 
