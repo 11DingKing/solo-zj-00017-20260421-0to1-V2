@@ -1,0 +1,58 @@
+.star-rating {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.star {
+  position: relative;
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+.star-interactive {
+  cursor: pointer;
+}
+
+.star-interactive:hover {
+  transform: scale(1.1);
+}
+
+.star-readonly {
+  cursor: default;
+}
+
+.star-small svg {
+  width: 16px;
+  height: 16px;
+}
+
+.star-medium svg {
+  width: 24px;
+  height: 24px;
+}
+
+.star-large svg {
+  width: 32px;
+  height: 32px;
+}
+
+.star svg {
+  display: block;
+  color: #d9d9d9;
+  transition: color 0.2s;
+}
+
+.star svg[fill="currentColor"] {
+  color: #faad14;
+}
+
+.star-rating:hover .star-interactive svg {
+  color: #faad14;
+}
+
+.star-half {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #faad14;
+}

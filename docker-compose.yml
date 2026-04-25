@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: course-evaluation-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: CourseEvaluation
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - course-evaluation-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: course-evaluation-backend
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=CourseEvaluation;Username=postgres;Password=postgres"
+      Jwt__Secret: "YourSuperSecretJwtKeyHereMakeItLongEnough32Chars"
+      Jwt__Issuer: "CourseEvaluationApi"
+      Jwt__Audience: "CourseEvaluationClient"
+      Jwt__ExpiryInMinutes: "60"
+    ports:
+      - "5000:8080"
+    depends_on:
+      - postgres
+    networks:
+      - course-evaluation-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: course-evaluation-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - course-evaluation-network
+
+networks:
+  course-evaluation-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

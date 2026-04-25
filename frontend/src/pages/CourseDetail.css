@@ -1,0 +1,142 @@
+.course-detail-page {
+  padding: 24px 0;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.course-header {
+  margin-bottom: 24px;
+}
+
+.course-header .page-title {
+  margin-bottom: 12px;
+}
+
+.course-rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.average-rating {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--warning-color);
+}
+
+.review-count {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.no-rating {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.review-form-section {
+  margin-bottom: 24px;
+}
+
+.review-form {
+  background-color: var(--background-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.review-form-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-card {
+  background-color: var(--background-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.review-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.review-nickname {
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.review-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.review-rating {
+  margin-bottom: 12px;
+}
+
+.review-content {
+  color: var(--text-color);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+  .course-rating-summary {
+    flex-wrap: wrap;
+  }
+  
+  .average-rating {
+    font-size: 24px;
+  }
+  
+  .review-header {
+    align-items: flex-start;
+  }
+}
