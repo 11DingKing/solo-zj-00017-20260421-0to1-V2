@@ -17,7 +17,7 @@ const Favorites = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [favoritingCourseIds, setFavoritingCourseIds] = useState<Set<string>>(new Set());
-  const debounceTimerRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const debounceTimerRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const pageSize = 20;
 
   const loadFavorites = useCallback(async () => {

@@ -23,7 +23,7 @@ const CourseDetail = () => {
   const [reviewSortBy, setReviewSortBy] = useState<string>("createdAt");
   const [reviewSortDescending, setReviewSortDescending] = useState(true);
   const [sortedReviews, setSortedReviews] = useState<Review[]>([]);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadCourseDetail = async () => {
     if (!id) return;

@@ -25,7 +25,7 @@ const CourseList = () => {
   });
   const [addingCourse, setAddingCourse] = useState(false);
   const [favoritingCourseIds, setFavoritingCourseIds] = useState<Set<string>>(new Set());
-  const debounceTimerRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const debounceTimerRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const loadCourses = async () => {
     try {
