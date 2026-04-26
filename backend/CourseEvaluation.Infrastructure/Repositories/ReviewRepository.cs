@@ -31,9 +31,9 @@ public class ReviewRepository : Repository<Review>, IReviewRepository
 
     public async Task<List<Review>> GetByCourseIdAsync(
         Guid courseId,
+        CancellationToken cancellationToken = default,
         ReviewSortBy? sortBy = null,
-        bool sortDescending = true,
-        CancellationToken cancellationToken = default)
+        bool sortDescending = true)
     {
         var query = DbSet
             .Include(r => r.User)

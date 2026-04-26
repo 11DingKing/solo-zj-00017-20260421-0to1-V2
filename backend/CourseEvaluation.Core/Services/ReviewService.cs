@@ -79,7 +79,7 @@ public class ReviewService : IReviewService
         CancellationToken cancellationToken = default)
     {
         var reviews = await _reviewRepository.GetByCourseIdAsync(
-            courseId, sortBy, sortDescending, cancellationToken);
+            courseId, cancellationToken, sortBy, sortDescending);
         return reviews.Select(MapToReviewDto).ToList();
     }
 

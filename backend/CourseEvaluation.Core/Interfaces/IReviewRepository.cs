@@ -22,9 +22,9 @@ public interface IReviewRepository : IRepository<Review>
 
     Task<List<Review>> GetByCourseIdAsync(
         Guid courseId,
+        CancellationToken cancellationToken = default,
         ReviewSortBy? sortBy = null,
-        bool sortDescending = true,
-        CancellationToken cancellationToken = default);
+        bool sortDescending = true);
 
     Task<Dictionary<int, int>> GetRatingDistributionAsync(
         Guid courseId,
